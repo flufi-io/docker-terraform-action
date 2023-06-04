@@ -23,7 +23,8 @@ RUN apt-get install -y locales && \
     usermod -aG sudo linuxbrew && \
     echo 'linuxbrew ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
     su - linuxbrew -c '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"' && \
-    echo 'eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)' >> /home/linuxbrew/.bashrc
+    echo 'eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)' >> /home/linuxbrew/.bashrc && \
+    echo 'export PATH="/home/linuxbrew/.linuxbrew/bin:${PATH}"' >> /home/linuxbrew/.bashrc
 
 # Install packages with Linuxbrew
 RUN su - linuxbrew -c 'brew install pre-commit'
