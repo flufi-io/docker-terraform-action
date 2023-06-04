@@ -1,0 +1,11 @@
+name: docker-build
+on:
+  pull_request:
+
+permissions: write-all
+
+jobs:
+  service:
+    uses: flufi-io/workflows/.github/workflows/docker_build.yaml@main
+    with:
+      ref: ${{ github.event.pull_request.head.sha }}
