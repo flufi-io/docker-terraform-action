@@ -26,7 +26,7 @@ ENV PATH="/home/linuxbrew/.linuxbrew/bin:${PATH}"
 RUN echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> $HOME/.bashrc \
     && echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> $HOME/.profile \
     && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-USER root
+
 RUN chown -R $CONTAINER_USER: /home/linuxbrew/.linuxbrew
 # Install packages with Homebrew
 ENV PATH="/home/linuxbrew/.linuxbrew/bin:${PATH}"
