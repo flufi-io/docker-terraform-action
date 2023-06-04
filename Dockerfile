@@ -6,10 +6,11 @@ ARG TERRAFORM_VERSION
 RUN apt-get update && apt-get install -y \
     curl \
     git \
-    build-essential
+    build-essential \
+    sudo
 
 # Install Homebrew
-RUN /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+RUN sudo -u linuxbrew /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 # Set up Homebrew environment
 ENV PATH="/home/linuxbrew/.linuxbrew/bin:${PATH}"
