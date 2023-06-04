@@ -2,12 +2,22 @@ FROM ubuntu:latest
 
 ARG TERRAFORM_VERSION
 
+
+
+
+
 # Install prerequisites
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y  -q --allow-unauthenticated \
     curl \
     git \
+    sudo \
     build-essential
+RUN useradd -m -s /bin/shellenv linuxbrew && \
+    usermod -aG sudo linuxbrew &&  \
+    mkdir -p /home/linuxbrew/.linuxbrew && \
+    chown -R linuxbrew: /home/linuxbrew/.linuxbrew
 
+USER linuxbrew
 # Install Homebrew
 RUN /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
@@ -16,8 +26,10 @@ ENV PATH="/home/linuxbrew/.linuxbrew/bin:${PATH}"
 RUN echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> $HOME/.bashrc \
     && echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> $HOME/.profile \
     && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-
+USER root
+RUN chown -R $CONTAINER_USER: /home/linuxbrew/.linuxbrew
 # Install packages with Homebrew
+ENV PATH="/home/linuxbrew/.linuxbrew/bin:${PATH}"
 RUN brew install pre-commit
 RUN brew install git
 RUN brew install yq
