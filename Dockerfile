@@ -3,9 +3,10 @@ FROM ubuntu:latest
 ARG TERRAFORM_VERSION
 
 # Install prerequisites
-RUN apt-get update && apt-get install -y -q --fix-missing \
+RUN apt-get update && apt-get install -y -q --allow-unauthenticated \
     curl \
     git \
+    sudo \
     build-essential
 
 RUN useradd -m -s /bin/shellenv linuxbrew && \
