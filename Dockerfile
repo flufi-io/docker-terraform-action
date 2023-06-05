@@ -44,5 +44,5 @@ RUN brew install tfenv \
     && tfenv install ${TERRAFORM_VERSION} \
     && tfenv use ${TERRAFORM_VERSION}
 
-ENTRYPOINT ["/entrypoint.sh"]
-
+USER root
+CMD ["/bin/bash"]
