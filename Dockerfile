@@ -4,7 +4,8 @@ FROM golang:alpine AS go-builder
 # Install build dependencies
 RUN apk update && apk add --no-cache \
     git \
-    build-base
+    build-base \
+    bash
 
 # Install terraform-docs and tfsec
 RUN go install github.com/terraform-docs/terraform-docs@latest && \
@@ -30,6 +31,9 @@ RUN pip install --upgrade pip setuptools && \
 
 # Start a new stage for the runtime
 FROM alpine:latest
+
+# Install bash
+RUN apk add --no-cache bash
 
 # Copy the Go binaries from the go-builder stage
 COPY --from=go-builder /go/bin/terraform-docs /usr/local/bin/
@@ -65,4 +69,4 @@ RUN TERRAFORM_VERSION=$(curl -s https://checkpoint-api.hashicorp.com/v1/check/te
 RUN rm -rf /var/cache/apk/* && \
     rm -rf /tmp/*
 
-CMD ["/bin/sh"]
+CMD ["/bin/bash"]
