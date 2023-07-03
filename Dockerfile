@@ -7,7 +7,7 @@ RUN apk update && apk add --no-cache \
     build-base
 
 # Install terraform-docs and tfsec
-RUN go install github.com/terraform-docs/terraform-docs@v0.16.0 && \
+RUN go install github.com/terraform-docs/terraform-docs@latest && \
     go install github.com/aquasecurity/tfsec/cmd/tfsec@latest
 
 # Install tfupdate
@@ -29,7 +29,7 @@ RUN pip install --upgrade pip setuptools && \
     pip install checkov pre-commit
 
 # Start a new stage for the runtime
-FROM alpine:3.14
+FROM alpine:latest
 
 # Copy the Go binaries from the go-builder stage
 COPY --from=go-builder /go/bin/terraform-docs /usr/local/bin/
