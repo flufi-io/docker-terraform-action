@@ -32,8 +32,8 @@ RUN pip install --upgrade pip setuptools && \
 # Start a new stage for the runtime
 FROM alpine:latest
 
-# Install bash
-RUN apk add --no-cache bash
+# Install bash and git
+RUN apk add --no-cache bash git
 
 # Copy the Go binaries from the go-builder stage
 COPY --from=go-builder /go/bin/terraform-docs /usr/local/bin/
