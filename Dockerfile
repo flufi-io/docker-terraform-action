@@ -1,48 +1,42 @@
-FROM ubuntu:latest
-
-ARG TERRAFORM_VERSION
+FROM golang:alpine
 
 # Install prerequisites
-RUN apt-get update && apt-get install -y -q --allow-unauthenticated \
+RUN apk update && apk add --no-cache \
     curl \
     git \
-    sudo \
-    build-essential
+    bash \
+    build-base \
+    jq \
+    py3-pip \
+    unzip
 
-# Create linuxbrew user and directory
-RUN useradd -m -s /bin/shellenv linuxbrew && \
-    usermod -aG sudo linuxbrew && \
-    mkdir -p /home/linuxbrew/.linuxbrew && \
-    chown -R linuxbrew: /home/linuxbrew/.linuxbrew
+# Install terraform-docs and tfsec
+RUN go install github.com/terraform-docs/terraform-docs@v0.16.0 && \
+    go install github.com/aquasecurity/tfsec/cmd/tfsec@latest
 
-# Switch to linuxbrew user
-USER linuxbrew
+# Upgrade pip and setuptools, and install checkov and pre-commit
+RUN pip3 install --upgrade pip setuptools && \
+    pip3 install checkov pre-commit
 
-# Install Homebrew
-RUN curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash -s -- --disable-analytics --install-dir=/home/linuxbrew/.linuxbrew
+# Install tflint
+RUN curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
 
-# Set up Homebrew environment
-ENV PATH="/home/linuxbrew/.linuxbrew/bin:${PATH}"
-RUN echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> $HOME/.bashrc \
-    && echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> $HOME/.profile \
-    && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+# Install tfupdate
+RUN go install github.com/minamijoyo/tfupdate@latest
 
-# Install packages with Homebrew
-ENV PATH="/home/linuxbrew/.linuxbrew/bin:${PATH}"
-RUN brew install pre-commit \
-    && brew install git \
-    && brew install yq \
-    && brew install jq \
-    && brew install go \
-    && brew install terraform-docs \
-    && brew install tfsec \
-    && brew install checkov \
-    && brew install tflint
+# Install terrascan
+RUN git clone https://github.com/tenable/terrascan.git && \
+    cd terrascan && \
+    make build && \
+    mv ./bin/terrascan /usr/local/bin/ && \
+    cd .. && \
+    rm -rf terrascan
 
-# Install tfenv and set the specified Terraform version
-RUN brew install tfenv \
-    && tfenv install ${TERRAFORM_VERSION} \
-    && tfenv use ${TERRAFORM_VERSION}
+# Fetch the latest version of Terraform
+RUN TERRAFORM_VERSION=$(curl -s https://checkpoint-api.hashicorp.com/v1/check/terraform | jq -r -M '.current_version') && \
+    curl -LO https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
+    unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
+    mv terraform /usr/local/bin/ && \
+    rm terraform_${TERRAFORM_VERSION}_linux_amd64.zip
 
-USER root
-CMD ["/bin/bash"]
+CMD ["/bin/sh"]
