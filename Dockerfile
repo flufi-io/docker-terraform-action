@@ -48,7 +48,11 @@ RUN apk update && apk add --no-cache \
     unzip
 
 # Install tflint
-RUN curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | sh
+RUN TFLINT_VERSION=$(curl -s https://api.github.com/repos/terraform-linters/tflint/releases/latest | jq -r .tag_name) && \
+    wget https://github.com/terraform-linters/tflint/releases/download/${TFLINT_VERSION}/tflint_linux_amd64.zip && \
+    unzip tflint_linux_amd64.zip && \
+    install tflint /usr/local/bin && \
+    rm tflint_linux_amd64.zip
 
 # Fetch the latest version of Terraform
 RUN TERRAFORM_VERSION=$(curl -s https://checkpoint-api.hashicorp.com/v1/check/terraform | jq -r -M '.current_version') && \
