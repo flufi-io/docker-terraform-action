@@ -18,8 +18,11 @@ RUN git clone https://github.com/tenable/terrascan.git && \
     cd terrascan && \
     make build
 
+# Remove build dependencies
+RUN apk del build-base
+
 # Use a build stage for Python dependencies
-FROM python:3.9-alpine AS python-builder
+FROM python:3.9-slim-buster AS python-builder
 
 # Upgrade pip and setuptools, and install checkov and pre-commit
 RUN pip install --upgrade pip setuptools && \
