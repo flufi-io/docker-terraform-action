@@ -154,7 +154,14 @@ RUN TERRAFORM_VERSION=$(curl -s https://checkpoint-api.hashicorp.com/v1/check/te
 
 
 # Clean up
-RUN rm -rf /var/cache/apk/* && \
-    rm -rf /tmp/*
+RUN apk del build-base python3-dev && \
+    rm -rf /var/cache/apk/*
 
-CMD ["/bin/bash"]
+# Set the working directory
+WORKDIR /app
+
+# Copy the application files to the container
+COPY . .
+
+# Run the application
+CMD ["bash"]
