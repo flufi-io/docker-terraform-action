@@ -1,3 +1,4 @@
+# Use a build stage for Go applications
 FROM golang:alpine AS go-builder
 
 # Install build dependencies
@@ -17,9 +18,6 @@ RUN go install github.com/minamijoyo/tfupdate@latest
 RUN git clone https://github.com/tenable/terrascan.git && \
     cd terrascan && \
     make build
-
-# Remove build dependencies
-RUN apk del build-base
 
 # Use a build stage for Python dependencies
 FROM python:3.9-slim-buster AS python-builder
@@ -71,7 +69,6 @@ RUN TERRAFORM_VERSION=$(curl -s https://checkpoint-api.hashicorp.com/v1/check/te
     unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
     mv terraform /usr/local/bin/ && \
     rm terraform_${TERRAFORM_VERSION}_linux_amd64.zip
-
 
 # Clean up
 RUN apk del build-base python3-dev && \
