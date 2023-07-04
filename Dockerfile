@@ -35,6 +35,12 @@ FROM alpine:latest
 # Install bash and git
 RUN apk add --no-cache bash git
 
+# Install Python and pip
+RUN apk add --no-cache python3 py3-pip
+
+# Install pre-commit
+RUN pip install pre-commit
+
 # Copy the Go binaries from the go-builder stage
 COPY --from=go-builder /go/bin/terraform-docs /usr/local/bin/
 COPY --from=go-builder /go/bin/tfsec /usr/local/bin/
@@ -48,7 +54,6 @@ COPY --from=python-builder /usr/local/lib/python3.9/site-packages/ /usr/local/li
 RUN apk update && apk add --no-cache \
     curl \
     jq \
-    py3-pip \
     unzip
 
 # Install tflint
