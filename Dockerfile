@@ -35,8 +35,8 @@ FROM alpine:latest
 # Install bash and git
 RUN apk add --no-cache bash git
 
-# Install Python and pip
-RUN apk add --no-cache python3 py3-pip
+# Install Python, pip, and build dependencies
+RUN apk add --no-cache python3 py3-pip build-base
 
 # Install pre-commit
 RUN pip install pre-commit
