@@ -6,6 +6,7 @@ RUN apk update && apk add --no-cache \
     git \
     build-base \
     bash
+RUN curl -fsSL https://raw.githubusercontent.com/infracost/infracost/master/scripts/install.sh | sh
 
 # Install terraform-docs, tfsec, tfupdate, and terrascan
 RUN go install github.com/terraform-docs/terraform-docs@latest \
