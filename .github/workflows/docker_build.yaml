@@ -1,3 +1,4 @@
+---
 name: docker-build
 on:
   pull_request:
@@ -9,4 +10,4 @@ jobs:
     uses: flufi-io/workflows/.github/workflows/docker_build.yaml@main
     with:
       ref: ${{ github.event.pull_request.head.sha }}
-      args: "TERRAFORM_VERSION=1.4.6"
+    secrets: inherit

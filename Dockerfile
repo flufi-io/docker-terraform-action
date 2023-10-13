@@ -1,34 +1,31 @@
-FROM ubuntu:latest
+FROM alpine:latest
 
-ARG TERRAFORM_VERSION
 
-# Install prerequisites
-RUN apt-get update && apt-get install -y -q --allow-unauthenticated \
-    curl \
-    git \
-    sudo \
-    build-essential
+RUN apk update \
+	&& apk --no-cache add bash coreutils curl file g++ grep git libc6-compat make ruby ruby-bigdecimal ruby-etc ruby-irb ruby-json ruby-test-unit sudo \
+	&& adduser -D -s /bin/bash linuxbrew \
+	&& echo 'linuxbrew ALL=(ALL) NOPASSWD:ALL' >>/etc/sudoers \
+	&& ln -s /bin/touch /usr/bin/touch \
 
-# Create linuxbrew user and directory
-RUN useradd -m -s /bin/shellenv linuxbrew && \
-    usermod -aG sudo linuxbrew && \
-    mkdir -p /home/linuxbrew/.linuxbrew && \
-    chown -R linuxbrew: /home/linuxbrew/.linuxbrew
 
 # Switch to linuxbrew user
 USER linuxbrew
+WORKDIR /home/linuxbrew
+ENV PATH=/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:$PATH \
+	SHELL=/bin/bash \
+	USER=linuxbrew
 
-# Install Homebrew
-RUN curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | bash -s -- --disable-analytics --install-dir=/home/linuxbrew/.linuxbrew
+RUN /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)" \
+	&& HOMEBREW_NO_ANALYTICS=1 brew install -s patchelf \
+	&& HOMEBREW_NO_ANALYTICS=1 brew install --ignore-dependencies binutils gmp isl@0.18 libmpc linux-headers mpfr zlib \
+	&& (HOMEBREW_NO_ANALYTICS=1 brew install --ignore-dependencies gcc || true) \
+	&& HOMEBREW_NO_ANALYTICS=1 brew install glibc \
+	&& HOMEBREW_NO_ANALYTICS=1 brew postinstall gcc \
+	&& HOMEBREW_NO_ANALYTICS=1 brew remove patchelf \
+	&& HOMEBREW_NO_ANALYTICS=1 brew install -s patchelf \
+	&& HOMEBREW_NO_ANALYTICS=1 brew config
 
-# Set up Homebrew environment
-ENV PATH="/home/linuxbrew/.linuxbrew/bin:${PATH}"
-RUN echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> $HOME/.bashrc \
-    && echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> $HOME/.profile \
-    && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
-# Install packages with Homebrew
-ENV PATH="/home/linuxbrew/.linuxbrew/bin:${PATH}"
 RUN brew install pre-commit \
     && brew install git \
     && brew install yq \
@@ -37,12 +34,20 @@ RUN brew install pre-commit \
     && brew install terraform-docs \
     && brew install tfsec \
     && brew install checkov \
-    && brew install tflint
+    && brew install tflint \
+    && brew install tfenv \
+    && brew install 1password-cli \
+    && brew install awscli \
 
-# Install tfenv and set the specified Terraform version
-RUN brew install tfenv \
-    && tfenv install ${TERRAFORM_VERSION} \
-    && tfenv use ${TERRAFORM_VERSION}
 
 USER root
-CMD ["/bin/bash"]
+
+# Copy the entry-point script into the image
+COPY entrypoint.sh /entrypoint.sh
+
+# Ensure the script is executable
+RUN chmod +x /entrypoint.sh
+
+# Set the entry-point script as the default thing to run on container startup
+ENTRYPOINT ["/entrypoint.sh"]
+
