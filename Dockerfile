@@ -1,7 +1,5 @@
 FROM ubuntu:latest
 
-ARG TERRAFORM_VERSION
-
 # Install prerequisites
 RUN apt-get update && apt-get install -y -q --allow-unauthenticated \
     curl \
@@ -37,12 +35,11 @@ RUN brew install pre-commit \
     && brew install terraform-docs \
     && brew install tfsec \
     && brew install checkov \
-    && brew install tflint
+    && brew install tflint \
+    && brew install tfupdate \
+    && brew install tfenv \
+    && brew install infracost
 
-# Install tfenv and set the specified Terraform version
-RUN brew install tfenv \
-    && tfenv install ${TERRAFORM_VERSION} \
-    && tfenv use ${TERRAFORM_VERSION}
 
 USER root
 CMD ["/bin/bash"]
